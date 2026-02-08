@@ -1,6 +1,6 @@
-var axios= require('axios');
+var axios = require('axios');
 var qs = require('qs');
-var crypto= require('crypto');
+var crypto = require('crypto');
 
 var StsUrl = 'https://{host}/';
 
@@ -29,7 +29,7 @@ var util = {
     backwardCompat: function (data) {
         var compat = {};
         for (var key in data) {
-            if (typeof(data[key]) == 'object') {
+            if (typeof (data[key]) == 'object') {
                 compat[this.lowerFirstLetter(key)] = this.backwardCompat(data[key])
             } else if (key === 'Token') {
                 compat['sessionToken'] = data[key];
@@ -79,10 +79,10 @@ var _getCredential = function (options, callback) {
         Policy: encodeURIComponent(policyStr),
     };
     if (action === 'AssumeRole') {
-      params.RoleSessionName = name;
-      params.RoleArn = options.roleArn;
+        params.RoleSessionName = name;
+        params.RoleArn = options.roleArn;
     } else {
-      params.Name = name;
+        params.Name = name;
     }
     params.Signature = util.getSignature(params, secretKey, method, endpoint);
 
@@ -90,31 +90,31 @@ var _getCredential = function (options, callback) {
         method: method,
         url: StsUrl.replace('{host}', endpoint),
         headers: {
-          'accept': 'application/json',
-          'content-type': 'application/x-www-form-urlencoded',
-          Host: endpoint
+            'accept': 'application/json',
+            'content-type': 'application/x-www-form-urlencoded',
+            Host: endpoint
         },
         data: qs.stringify(params),
         proxy: proxy,
     };
     axios(opt).then(res => {
-      let data = res.data.Response;
-      if (data.Error) {
-        const RequestId = data?.RequestId || '';
-        const res = Object.assign(data.Error, { RequestId });
-        return callback(res);
-      }
-      data.startTime = data.ExpiredTime - durationSeconds;
-      data = util.backwardCompat(data);
-      callback(null, data);
+        let data = res.data.Response;
+        if (data.Error) {
+            const RequestId = data?.RequestId || '';
+            const res = Object.assign(data.Error, { RequestId });
+            return callback(res);
+        }
+        data.startTime = data.ExpiredTime - durationSeconds;
+        data = util.backwardCompat(data);
+        callback(null, data);
     }).catch(err => {
-      callback(err);
+        callback(err);
     });
 };
 
 // 获取联合身份临时访问凭证 GetFederationToken
 var getCredential = (opt, callback) => {
-  Object.assign(opt, { action: 'GetFederationToken' });
+    Object.assign(opt, { action: 'GetFederationToken' });
     if (callback) return _getCredential(opt, callback);
     return new Promise((resolve, reject) => {
         _getCredential(opt, (err, data) => {
@@ -125,13 +125,13 @@ var getCredential = (opt, callback) => {
 
 // 申请扮演角色 AssumeRole
 var getRoleCredential = (opt, callback) => {
-  Object.assign(opt, { action: 'AssumeRole' });
-  if (callback) return _getCredential(opt, callback);
-  return new Promise((resolve, reject) => {
-      _getCredential(opt, (err, data) => {
-          err ? reject(err) : resolve(data);
-      });
-  });
+    Object.assign(opt, { action: 'AssumeRole' });
+    if (callback) return _getCredential(opt, callback);
+    return new Promise((resolve, reject) => {
+        _getCredential(opt, (err, data) => {
+            err ? reject(err) : resolve(data);
+        });
+    });
 };
 
 var getPolicy = function (scope) {
@@ -140,7 +140,7 @@ var getPolicy = function (scope) {
         var action = item.action || '';
         var bucket = item.bucket || '';
         var region = item.region || '';
-        var shortBucketName = bucket.substr(0 , bucket.lastIndexOf('-'));
+        var shortBucketName = bucket.substr(0, bucket.lastIndexOf('-'));
         var appId = bucket.substr(1 + bucket.lastIndexOf('-'));
         var prefix = item.prefix;
         var resource = 'qcs::cos:' + region + ':uid/' + appId + ':prefix//' + appId + '/' + shortBucketName + '/' + prefix;
@@ -150,14 +150,14 @@ var getPolicy = function (scope) {
         return {
             'action': action,
             'effect': 'allow',
-            'principal': {'qcs': '*'},
+            'principal': { 'qcs': '*' },
             'resource': resource,
         };
     });
-    return {'version': '2.0', 'statement': statement};
+    return { 'version': '2.0', 'statement': statement };
 };
 
-var  cosStsSdk = {
+var cosStsSdk = {
     getCredential: getCredential,
     getRoleCredential: getRoleCredential,
     getPolicy: getPolicy,
