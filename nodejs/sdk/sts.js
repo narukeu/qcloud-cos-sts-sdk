@@ -6,47 +6,47 @@ var StsUrl = 'https://{host}/';
 
 var util = {
     // 获取随机数
-    getRandom: function (min, max) {
+    getRandom: (min, max) => {
         return Math.round(Math.random() * (max - min) + min);
     },
     // obj 转 query string
-    json2str: function (obj, $notEncode) {
+    json2str: (obj, $notEncode) => {
         var arr = [];
-        Object.keys(obj).sort().forEach(function (item) {
+        Object.keys(obj).sort().forEach((item) => {
             var val = obj[item] || '';
             arr.push(item + '=' + ($notEncode ? encodeURIComponent(val) : val));
         });
         return arr.join('&');
     },
     // 计算签名
-    getSignature: function (opt, key, method, stsDomain) {
+    getSignature: (opt, key, method, stsDomain) => {
         var formatString = method + stsDomain + '/?' + util.json2str(opt);
         var hmac = crypto.createHmac('sha1', key);
         var sign = hmac.update(Buffer.from(formatString, 'utf8')).digest('base64');
         return sign;
     },
     // v2接口的key首字母小写，v3改成大写，此处做了向下兼容
-    backwardCompat: function (data) {
+    backwardCompat: (data) => {
         var compat = {};
         for (var key in data) {
             if (typeof (data[key]) == 'object') {
-                compat[this.lowerFirstLetter(key)] = this.backwardCompat(data[key])
+                compat[util.lowerFirstLetter(key)] = util.backwardCompat(data[key])
             } else if (key === 'Token') {
                 compat['sessionToken'] = data[key];
             } else {
-                compat[this.lowerFirstLetter(key)] = data[key];
+                compat[util.lowerFirstLetter(key)] = data[key];
             }
         }
 
         return compat;
     },
-    lowerFirstLetter: function (source) {
+    lowerFirstLetter: (source) => {
         return source.charAt(0).toLowerCase() + source.slice(1);
     }
 };
 
 // 拼接获取临时密钥的参数
-var _getCredential = function (options, callback) {
+var _getCredential = (options, callback) => {
 
     if (options.durationInSeconds !== undefined) {
         console.warn('warning: durationInSeconds has been deprecated, Please use durationSeconds ).');
@@ -134,9 +134,9 @@ var getRoleCredential = (opt, callback) => {
     });
 };
 
-var getPolicy = function (scope) {
+var getPolicy = (scope) => {
     // 定义绑定临时密钥的权限策略
-    var statement = scope.map(function (item) {
+    var statement = scope.map((item) => {
         var action = item.action || '';
         var bucket = item.bucket || '';
         var region = item.region || '';
