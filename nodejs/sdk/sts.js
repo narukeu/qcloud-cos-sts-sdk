@@ -53,8 +53,9 @@ const _getCredential = (options, callback) => {
         console.warn('warning: durationInSeconds has been deprecated, Please use durationSeconds ).');
     }
 
-    const { secretId, secretKey, proxy = '', region = 'ap-beijing', policy } = options;
-
+    const { secretId, secretKey, policy } = options;
+    const proxy = options.proxy || '';
+    const region = options.region || 'ap-beijing';
     const host = options.host || '';
 
     const durationSeconds = options.durationSeconds || options.durationInSeconds || 1800;
@@ -139,7 +140,9 @@ const getRoleCredential = (opt, callback) => {
 const getPolicy = (scope) => {
     // 定义绑定临时密钥的权限策略
     const statement = scope.map((item) => {
-        const { action = '', bucket = '', region = '', prefix } = item;
+        const action = item.action || '';
+        const bucket = item.bucket || '';
+        const region = item.region || '';
 
         const shortBucketName = bucket.substr(0, bucket.lastIndexOf('-'));
         const appId = bucket.substr(1 + bucket.lastIndexOf('-'));
