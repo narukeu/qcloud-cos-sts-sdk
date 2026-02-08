@@ -140,6 +140,7 @@ const getRoleCredential = (opt, callback) => {
 const getPolicy = (scope) => {
     // 定义绑定临时密钥的权限策略
     const statement = scope.map((item) => {
+        const { prefix } = item;
         const action = item.action || '';
         const bucket = item.bucket || '';
         const region = item.region || '';
