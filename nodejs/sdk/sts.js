@@ -11,14 +11,13 @@ const util = {
     },
     // obj 转 query string
     json2str: (obj, $notEncode) => {
-        let arr = [];
-        Object.keys(obj)
+        return Object.keys(obj)
             .sort()
-            .forEach((item) => {
+            .map((item) => {
                 const val = obj[item] || '';
-                arr.push(item + '=' + ($notEncode ? encodeURIComponent(val) : val));
-            });
-        return arr.join('&');
+                return `${item}=${$notEncode ? encodeURIComponent(val) : val}`;
+            })
+            .join('&');
     },
     // 计算签名
     getSignature: (opt, key, method, stsDomain) => {
@@ -88,7 +87,7 @@ const _getCredential = (options, callback) => {
     params.Signature = util.getSignature(params, secretKey, method, endpoint);
 
     const opt = {
-        method: method,
+        method,
         url: StsUrl.replace('{host}', endpoint),
         headers: {
             'accept': 'application/json',
@@ -96,7 +95,7 @@ const _getCredential = (options, callback) => {
             'Host': endpoint,
         },
         data: qs.stringify(params),
-        proxy: proxy,
+        proxy,
     };
     axios(opt)
         .then((res) => {
@@ -145,8 +144,8 @@ const getPolicy = (scope) => {
         const bucket = item.bucket || '';
         const region = item.region || '';
 
-        const shortBucketName = bucket.substr(0, bucket.lastIndexOf('-'));
-        const appId = bucket.substr(1 + bucket.lastIndexOf('-'));
+        const shortBucketName = bucket.substring(0, bucket.lastIndexOf('-'));
+        const appId = bucket.substring(1 + bucket.lastIndexOf('-'));
 
         let resource = `qcs::cos:${region}:uid/${appId}:prefix//${appId}/${shortBucketName}/${prefix}`;
         if (action === 'name/cos:GetService') {
@@ -163,9 +162,9 @@ const getPolicy = (scope) => {
 };
 
 const cosStsSdk = {
-    getCredential: getCredential,
-    getRoleCredential: getRoleCredential,
-    getPolicy: getPolicy,
+    getCredential,
+    getRoleCredential,
+    getPolicy,
 };
 
 module.exports = cosStsSdk;
